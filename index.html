@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CleanMap 2.0 | Campus Waste Intelligence</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--bg:#f4f7f5;--card:#fff;--ink:#172b25;--muted:#6b7c75;--green:#167d56;--mint:#dff5e9;--line:#e2ebe6;--orange:#e58b35;--red:#d84b4b;--shadow:0 10px 28px #163b2b0d}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);font:14px/1.45 Inter,system-ui,-apple-system,Segoe UI,sans-serif;color:var(--ink)}
+header{background:#fff;border-bottom:1px solid var(--line);padding:15px 24px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:500}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:19px}.logo{width:36px;height:36px;border-radius:12px;background:var(--green);color:white;display:grid;place-items:center;font-size:20px}
+.brand small{display:block;color:var(--muted);font-size:11px;font-weight:500}.header-right{display:flex;align-items:center;gap:10px;color:var(--muted)}.live{color:var(--green);font-weight:700;background:var(--mint);padding:7px 10px;border-radius:30px}
+main{max-width:1440px;margin:auto;padding:22px;display:grid;gap:18px}.intro{display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap}.eyebrow{text-transform:uppercase;letter-spacing:1.5px;color:var(--green);font-weight:800;font-size:11px}.intro h1{margin:4px 0;font-size:clamp(24px,3vw,34px);letter-spacing:-1px}.intro p{margin:0;color:var(--muted)}button,select,input{font:inherit}button{border:0;border-radius:10px;padding:10px 14px;font-weight:700;cursor:pointer}.primary{background:var(--green);color:white}.secondary{background:#edf5f0;color:var(--green)}.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:13px}.stat,.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow)}.stat{padding:17px}.stat-top{display:flex;justify-content:space-between;color:var(--muted);font-weight:600}.stat-icon{width:32px;height:32px;border-radius:10px;background:var(--mint);display:grid;place-items:center}.num{font-size:30px;font-weight:800;letter-spacing:-1px;margin-top:10px}.sub{color:var(--muted);font-size:12px}.content{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(290px,.85fr);gap:16px}.panel-head{padding:16px 18px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line);flex-wrap:wrap}.panel-head h2{font-size:16px;margin:0}.panel-head p{margin:3px 0 0;color:var(--muted);font-size:12px}.map-tools{display:flex;gap:8px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line)}select,input{border:1px solid var(--line);background:white;border-radius:9px;padding:9px;color:var(--ink);max-width:100%}#map{height:490px;width:100%;z-index:1}.map-footer{display:flex;gap:16px;flex-wrap:wrap;padding:12px 16px;color:var(--muted);font-size:12px}.key{display:inline-flex;align-items:center;gap:6px}.dot{width:9px;height:9px;border-radius:50%;display:inline-block}.side{display:grid;gap:16px;align-content:start}.report-list{padding:6px 14px 12px;max-height:360px;overflow:auto}.report{padding:13px 2px;border-bottom:1px solid var(--line);display:grid;gap:7px}.report:last-child{border-bottom:0}.report-title{font-weight:750}.report-meta{color:var(--muted);font-size:12px}.pill{font-size:11px;font-weight:800;border-radius:20px;padding:4px 8px;display:inline-block;background:#fff0df;color:#a85c0c}.pill.high{background:#ffe5e5;color:#b42e2e}.pill.done{background:#dff5e9;color:#167d56}.report-row{display:flex;justify-content:space-between;gap:8px;align-items:center}.tiny{padding:6px 9px;font-size:11px;border-radius:8px}.activity{padding:15px 18px}.activity-item{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}.activity-item:last-child{border:0}.activity-icon{width:30px;height:30px;border-radius:10px;background:#edf5f0;display:grid;place-items:center;flex-shrink:0}.activity b{display:block;font-size:12px}.activity span{color:var(--muted);font-size:11px}.empty{padding:28px;color:var(--muted);text-align:center}.modal-back{display:none;position:fixed;inset:0;background:#10271fcc;z-index:1000;align-items:center;justify-content:center;padding:16px}.modal{background:white;border-radius:18px;padding:22px;width:min(460px,100%);display:grid;gap:13px}.modal h2{margin:0}.field{display:grid;gap:6px}.field label{font-weight:700;font-size:12px}.field input,.field select{width:100%}.modal-actions{display:flex;justify-content:end;gap:8px;margin-top:5px}.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:#173c2e;color:white;padding:11px 16px;border-radius:12px;z-index:1200;display:none}
+.analytics-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;padding:16px}.metric{background:#f5f9f6;border:1px solid var(--line);border-radius:12px;padding:13px}.metric strong{font-size:22px;display:block}.metric span{font-size:11px;color:var(--muted)}
+section[id],main[id]{scroll-margin-top:85px}.sidebar{position:fixed;left:0;top:0;bottom:0;width:298px;background:#176b52;color:#fff;padding:22px 21px;z-index:800;display:flex;flex-direction:column;gap:28px}
+.sidebrand{display:flex;align-items:center;gap:13px;font-size:21px;font-weight:900;line-height:1.05}
+.sidebrand .mark{width:49px;height:49px;border-radius:17px;background:#d7f56a;color:#176b52;display:grid;place-items:center;font-size:29px;font-weight:400}
+.sidebrand small{display:block;font-size:12px;letter-spacing:1.7px;font-weight:500;margin-top:8px;color:#d7eee5}
+.navlabel{font-size:12px;letter-spacing:1.5px;color:#a9d9c6;font-weight:800;margin:3px 0 10px 15px}
+.sidenav{display:grid;gap:8px}
+.navitem{display:flex;align-items:center;gap:17px;width:100%;text-align:left;background:transparent;color:#fff;padding:16px 15px;border-radius:15px;font-size:15px;font-weight:500}
+.navitem:hover,.navitem.active{background:#ffffff20}
+.navico{width:23px;text-align:center;font-size:18px}
+.navbadge{margin-left:auto;background:#ffffff25;border-radius:7px;padding:4px 8px;font-size:12px}
+body{padding-left:298px}header{top:0}
+body[data-view="overview"] #hotspots,body[data-view="overview"] #analytics{display:none}
+body[data-view="hotspots"] #overview .intro,body[data-view="hotspots"] #overview .stats,body[data-view="hotspots"] #analytics{display:none}
+body[data-view="cleanup"] #overview .intro,body[data-view="cleanup"] #overview .stats,body[data-view="cleanup"] #analytics{display:none}
+body[data-view="cleanup"] #hotspots{display:block;grid-template-columns:1fr}
+body[data-view="cleanup"] #hotspots > .panel{display:none}
+body[data-view="cleanup"] #hotspots .side > .panel:not(#cleanup){display:none}
+body[data-view="cleanup"] #cleanup{display:block}
+body[data-view="cleanup"] #cleanup .report-list{max-height:none}
+body[data-view="analytics"] #overview .intro,body[data-view="analytics"] #overview .stats,body[data-view="analytics"] #hotspots{display:none}
+body[data-view="analytics"] #analytics{display:block}
+body[data-view="overview"] #overview .intro,body[data-view="overview"] #overview .stats{display:grid}
+body[data-view="overview"] #overview .intro{display:flex}
+
+@media(max-width:760px){.sidebar{position:relative;width:100%;height:auto;bottom:auto;padding:14px;gap:15px}.sidebrand .mark{width:40px;height:40px}.sidenav{grid-template-columns:repeat(2,minmax(0,1fr));gap:5px}.navitem{padding:10px 8px;gap:8px;font-size:12px}body{padding-left:0}header{position:relative}}
+@media(max-width:900px){.analytics-grid{grid-template-columns:repeat(2,1fr)}}footer{text-align:center;color:var(--muted);font-size:11px;padding:4px 0 18px}
+@media(max-width:900px){.content{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}#map{height:420px}}@media(max-width:520px){header{padding:12px 14px}.header-right .hide-mobile{display:none}main{padding:14px}.stats{gap:8px}.stat{padding:12px}.num{font-size:25px}#map{height:360px}.intro h1{font-size:25px}}
+</style>
+</head>
+<body data-view="overview">
+<aside class="sidebar" aria-label="Main navigation">
+  <div class="sidebrand"><div class="mark">✳</div><div>CleanMap <span style="color:#d7f56a">2.0</span><small>WASTE INTELLIGENCE</small></div></div>
+  <div><div class="navlabel">WORKSPACE</div><nav class="sidenav">
+    <button class="navitem active" data-target="overview"><span class="navico">▦</span>Overview</button>
+    <button class="navitem" data-target="hotspots"><span class="navico">⚘</span>Hotspots <span class="navbadge" id="sideHotspotCount">4</span></button>
+    <button class="navitem" id="sideReport"><span class="navico">＋</span>Report waste</button>
+    <button class="navitem" data-target="cleanup"><span class="navico">✓</span>Cleanup tracker</button>
+    <button class="navitem" data-target="analytics"><span class="navico">▥</span>Impact analytics</button>
+  </nav></div>
+</aside>
+<header><div class="brand"><div class="logo">♻</div><div>CleanMap 2.0<small>Campus Waste Intelligence</small></div></div><div class="header-right"><span class="hide-mobile">Chennai Campus Network</span><span class="live">● Live dashboard</span></div></header>
+<main id="overview">
+<section class="intro"><div><div class="eyebrow">Operations overview</div><h1>Cleaner campus. Smarter action.</h1><p>Spot waste hotspots, track cleanups, and verify campus impact from one map.</p></div><button class="primary" id="newReport">＋ Report a hotspot</button></section>
+<section class="stats">
+<div class="stat"><div class="stat-top"><span>Open reports</span><span class="stat-icon">⚑</span></div><div class="num" id="openCount">32</div><div class="sub">Awaiting cleanup or assignment</div></div>
+<div class="stat"><div class="stat-top"><span>Priority hotspots</span><span class="stat-icon">⚠</span></div><div class="num" id="priorityCount">2</div><div class="sub">High attention needed</div></div>
+<div class="stat"><div class="stat-top"><span>Cleanups verified</span><span class="stat-icon">✓</span></div><div class="num" id="verifiedCount">42</div><div class="sub">Community impact confirmed</div></div>
+<div class="stat"><div class="stat-top"><span>Avg. response time</span><span class="stat-icon">◷</span></div><div class="num">6.4<span style="font-size:16px">h</span></div><div class="sub">From report to action</div></div>
+</section>
+<section class="panel" id="analytics"><div class="panel-head"><div><h2>Environmental impact & hotspot intelligence</h2><p>Metrics calculated from the current demo reports</p></div><button class="secondary" id="exportBtn">Export CSV ↓</button></div><div class="analytics-grid"><div class="metric"><strong id="metricOpen">0</strong><span>Unresolved reports</span></div><div class="metric"><strong id="metricVerified">0</strong><span>Verified with after-photo</span></div><div class="metric"><strong id="metricRecurring">0</strong><span>Recurring locations</span></div><div class="metric"><strong id="metricRate">0%</strong><span>Verification rate</span></div></div></section>
+<section class="content" id="hotspots">
+<div class="panel">
+<div class="panel-head"><div><h2>Smart hotspot map</h2><p>Explore reports, priority areas, and verified cleanup locations</p></div><button class="secondary" id="locateBtn">◎ Locate me</button></div>
+<div class="map-tools"><input id="search" placeholder="Search a location…" aria-label="Search reports" style="flex:1;min-width:150px"><select id="statusFilter" aria-label="Filter status"><option value="all">All statuses</option><option value="Reported">Reported</option><option value="Assigned">Assigned</option><option value="Cleaning">Cleaning</option><option value="Verified">Verified</option></select><select id="riskFilter" aria-label="Filter priority"><option value="all">All priorities</option><option value="High">High priority</option><option value="Medium">Medium priority</option><option value="Low">Low priority</option></select><button class="secondary" id="resetMap">Reset map</button></div>
+<div id="map" role="application" aria-label="Interactive campus waste hotspot map"></div>
+<div class="map-footer"><span class="key"><i class="dot" style="background:#d84b4b"></i>High priority</span><span class="key"><i class="dot" style="background:#e58b35"></i>Medium priority</span><span class="key"><i class="dot" style="background:#167d56"></i>Verified cleanup</span><span>Click any marker for details</span></div>
+</div>
+<div class="side">
+<div class="panel" id="cleanup"><div class="panel-head"><div><h2>Reports to action</h2><p>Sample demo records · update statuses below</p></div><span class="pill high" id="queueCount">4 items</span></div><div class="report-list" id="reportList"></div></div>
+<div class="panel"><div class="panel-head"><div><h2>Recent activity</h2><p>Latest changes in the demo dashboard</p></div></div><div class="activity" id="activity"><div class="activity-item"><div class="activity-icon">✓</div><div><b>Cleanup verified near Main Gate</b><span>Today · Demo activity</span></div></div><div class="activity-item"><div class="activity-icon">⚑</div><div><b>New report near Food Court</b><span>Today · Demo activity</span></div></div><div class="activity-item"><div class="activity-icon">♻</div><div><b>Waste hotspot reviewed</b><span>Yesterday · Demo activity</span></div></div></div></div>
+</div>
+</section>
+<footer>CleanMap 2.0 · Demo prototype · Map tiles require an internet connection. Demo reports are stored locally in this browser when storage permits; this is not a shared production database.</footer>
+</main>
+<div class="modal-back" id="modal"><form class="modal" id="reportForm"><h2>Report a waste hotspot</h2><p class="sub">Add a demo report to the map and action queue.</p><div class="field"><label for="place">Location name</label><input id="place" required placeholder="e.g. Library entrance"></div><div class="field"><label for="kind">Waste type</label><select id="kind"><option>Mixed waste</option><option>Plastic</option><option>Food waste</option><option>E-waste</option><option>Paper</option></select></div><div class="field"><label for="risk">Priority</label><select id="risk"><option>Medium</option><option>High</option><option>Low</option></select></div><div class="field"><label for="beforePhoto">Before cleanup photo (optional)</label><input id="beforePhoto" type="file" accept="image/*"></div><div class="field"><label for="afterPhoto">After cleanup photo (optional)</label><input id="afterPhoto" type="file" accept="image/*"></div><div class="field"><label for="status">Status</label><select id="status"><option>Reported</option><option>Assigned</option><option>Cleaning</option><option>Verified</option></select></div><div class="modal-actions"><button type="button" class="secondary" id="cancelModal">Cancel</button><button class="primary" type="submit">Add report</button></div></form></div><div class="toast" id="toast"></div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const reports=[
+{id:1,name:"Main Gate",kind:"Mixed waste",risk:"High",status:"Reported",lat:13.0104,lng:80.2357,age:"18 min ago"},
+{id:2,name:"Food Court",kind:"Food waste",risk:"High",status:"Assigned",lat:13.0121,lng:80.2383,age:"42 min ago"},
+{id:3,name:"Library entrance",kind:"Paper",risk:"Medium",status:"Cleaning",lat:13.0087,lng:80.2400,age:"1 hour ago"},
+{id:4,name:"Parking area",kind:"Plastic",risk:"Medium",status:"Reported",lat:13.0068,lng:80.2342,age:"2 hours ago"},
+{id:5,name:"Garden walkway",kind:"Mixed waste",risk:"Low",status:"Verified",lat:13.0130,lng:80.2326,age:"Yesterday"},
+{id:6,name:"Hostel block",kind:"Plastic",risk:"Medium",status:"Assigned",lat:13.0048,lng:80.2390,age:"3 hours ago"},
+{id:7,name:"Sports ground",kind:"Food waste",risk:"Low",status:"Verified",lat:13.0150,lng:80.2410,age:"Yesterday"}
+];
+let nextId=8, markers={};
+function recurrenceCount(r){return reports.filter(x=>x.name.trim().toLowerCase()===r.name.trim().toLowerCase()).length}
+function severityScore(r){return Math.min(100,({High:60,Medium:35,Low:15}[r.risk]||15)+Math.min(40,(recurrenceCount(r)-1)*20)+(r.status==="Verified"?0:10))}
+function persist(){try{localStorage.setItem("cleanmap20Reports",JSON.stringify(reports));localStorage.setItem("cleanmap20NextId",String(nextId));return true}catch(e){return false}}
+try{const saved=JSON.parse(localStorage.getItem("cleanmap20Reports")||"null");if(Array.isArray(saved)&&saved.length){reports.splice(0,reports.length,...saved);nextId=Number(localStorage.getItem("cleanmap20NextId"))||Math.max(...reports.map(r=>r.id))+1}}catch(e){}
+const map=L.map('map').setView([13.0102,80.2375],15);
+// Tile-provider fallback: start with Esri, then try OpenStreetMap if tiles fail.
+// Public tile services can still be blocked by a network/firewall or their usage policies.
+const tileProviders = [
+  {url:'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', options:{maxZoom:19, attribution:'Tiles &copy; Esri'}} ,
+  {url:'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', options:{subdomains:'abc', maxZoom:19, attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'}}
+];
+let tileProviderIndex = 0, tileErrors = 0;
+let tileLayer = L.tileLayer(tileProviders[0].url, tileProviders[0].options).addTo(map);
+tileLayer.on('tileerror', () => {
+  tileErrors++;
+  if (tileErrors >= 4 && tileProviderIndex < tileProviders.length - 1) {
+    tileProviderIndex++;
+    tileErrors = 0;
+    map.removeLayer(tileLayer);
+    tileLayer = L.tileLayer(tileProviders[tileProviderIndex].url, tileProviders[tileProviderIndex].options).addTo(map);
+    toast('Switching map tile provider…');
+  } else if (tileErrors >= 8) {
+    const el = document.getElementById('map');
+    if (el && !document.getElementById('mapWarning')) {
+      const note = document.createElement('div'); note.id='mapWarning';
+      note.style.cssText='position:absolute;z-index:1000;top:10px;left:10px;right:10px;background:#fff7ed;color:#9a3412;border:1px solid #fdba74;padding:9px 12px;border-radius:8px;font-size:12px';
+      note.textContent='Map tiles are blocked by your network or unavailable. Hotspot list and filters can still be used.';
+      el.appendChild(note);
+    }
+  }
+});
+setTimeout(() => map.invalidateSize(), 250);
+function color(r){return r.status==="Verified"?"#167d56":r.risk==="High"?"#d84b4b":r.risk==="Medium"?"#e58b35":"#4d8ac7"}
+function iconFor(r){return L.divIcon({className:'',html:`<div style="width:26px;height:26px;border:3px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color(r)};box-shadow:0 2px 8px #0004;display:grid;place-items:center"><span style="transform:rotate(45deg);color:white;font-size:10px;font-weight:900">${r.status==="Verified"?"✓":"!"}</span></div>`,iconSize:[26,26],iconAnchor:[13,26],popupAnchor:[0,-25]})}
+function popup(r){return `<div style="min-width:180px"><b>${escapeHtml(r.name)}</b><p style="margin:5px 0;color:#667">${escapeHtml(r.kind)} · ${escapeHtml(r.risk)} priority</p><p style="margin:5px 0">Status: <b>${escapeHtml(r.status)}</b></p><p style="margin:5px 0">Priority score: <b>${severityScore(r)}/100</b></p><p style="margin:5px 0">Reports at this named location: <b>${recurrenceCount(r)}</b></p><p style="margin:5px 0;color:#667;font-size:12px">${escapeHtml(r.age)}</p>${r.beforePhoto||r.afterPhoto?`<div style="display:flex;gap:6px;margin:8px 0">${r.beforePhoto?`<div><small>Before</small><img alt="Before cleanup" src="${r.beforePhoto}" style="width:90px;height:65px;object-fit:cover;border-radius:6px"></div>`:""}${r.afterPhoto?`<div><small>After</small><img alt="After cleanup" src="${r.afterPhoto}" style="width:90px;height:65px;object-fit:cover;border-radius:6px"></div>`:""}</div>`:""}<button onclick="focusReport(${r.id})" style="background:#167d56;color:white;padding:7px 10px">View in queue</button></div>`}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function filtered(){let q=document.getElementById('search').value.toLowerCase(),s=document.getElementById('statusFilter').value,risk=document.getElementById('riskFilter').value;return reports.filter(r=>(!q||r.name.toLowerCase().includes(q)||r.kind.toLowerCase().includes(q))&&(s==='all'||r.status===s)&&(risk==='all'||r.risk===risk))}
+function render(){Object.values(markers).forEach(m=>map.removeLayer(m));markers={};let visible=filtered();visible.forEach(r=>{let m=L.marker([r.lat,r.lng],{icon:iconFor(r)}).addTo(map).bindPopup(popup(r));markers[r.id]=m});document.getElementById('reportList').innerHTML=visible.filter(r=>r.status!=="Verified").slice().sort((a,b)=>({High:0,Medium:1,Low:2}[a.risk]-({High:0,Medium:1,Low:2}[b.risk]))).map(r=>`<div class="report" id="report-${r.id}"><div class="report-row"><span class="report-title">${escapeHtml(r.name)}</span><span class="pill ${r.risk==='High'?'high':''}">${r.risk}</span></div><div class="report-meta">${escapeHtml(r.kind)} · ${escapeHtml(r.age)}</div><div class="report-row"><select aria-label="Update ${escapeHtml(r.name)} status" onchange="updateStatus(${r.id},this.value)" class="tiny">${["Reported","Assigned","Cleaning","Verified"].map(s=>`<option ${r.status===s?'selected':''}>${s}</option>`).join('')}</select><button class="secondary tiny" onclick="zoomTo(${r.id})">Locate ↗</button></div></div>`).join('')||'<div class="empty">No matching open reports.</div>';document.getElementById('queueCount').textContent=visible.filter(r=>r.status!=="Verified").length+' items';document.getElementById('openCount').textContent=reports.filter(r=>r.status!=="Verified").length+25;document.getElementById('priorityCount').textContent=reports.filter(r=>r.risk==="High"&&r.status!=="Verified").length;document.getElementById('verifiedCount').textContent=42+reports.filter(r=>r.status==="Verified").length-1}
+function zoomTo(id){let r=reports.find(x=>x.id===id);if(!r)return;map.flyTo([r.lat,r.lng],17,{duration:.6});if(markers[id])markers[id].openPopup()}
+function focusReport(id){document.getElementById('report-'+id)?.scrollIntoView({behavior:'smooth',block:'center'});zoomTo(id)}
+function toast(msg){let t=document.getElementById('toast');t.textContent=msg;t.style.display='block';setTimeout(()=>t.style.display='none',2500)}
+function updateStatus(id,status){let r=reports.find(x=>x.id===id);if(!r)return;r.status=status;if(status==='Verified')r.age='Just now';document.getElementById('activity').insertAdjacentHTML('afterbegin',`<div class="activity-item"><div class="activity-icon">✓</div><div><b>${escapeHtml(r.name)} → ${escapeHtml(status)}</b><span>Just now · Demo activity</span></div></div>`);render();toast('Status updated: '+status)}
+window.focusReport=focusReport;window.zoomTo=zoomTo;window.updateStatus=updateStatus;
+['search','statusFilter','riskFilter'].forEach(id=>document.getElementById(id).addEventListener(id==='search'?'input':'change',render));
+document.getElementById('resetMap').onclick=()=>{document.getElementById('search').value='';document.getElementById('statusFilter').value='all';document.getElementById('riskFilter').value='all';map.flyTo([13.0102,80.2375],15);render()};
+document.getElementById('locateBtn').onclick=()=>{if(!navigator.geolocation){toast('Location is not supported in this browser.');return}navigator.geolocation.getCurrentPosition(p=>{map.flyTo([p.coords.latitude,p.coords.longitude],17);L.circleMarker([p.coords.latitude,p.coords.longitude],{radius:8,color:'#167d56',fillColor:'#9be4be',fillOpacity:.9}).addTo(map).bindPopup('Your current location').openPopup()},()=>toast('Location permission denied or unavailable.'))};
+const modal=document.getElementById('modal');document.getElementById('newReport').onclick=()=>modal.style.display='flex';document.getElementById('cancelModal').onclick=()=>modal.style.display='none';modal.addEventListener('click',e=>{if(e.target===modal)modal.style.display='none'});
+function readImage(file){return new Promise(resolve=>{if(!file)return resolve('');const reader=new FileReader();reader.onload=()=>resolve(String(reader.result));reader.onerror=()=>resolve('');reader.readAsDataURL(file)})}
+async function geocodeLocation(query){
+  // Try Photon first, then Nominatim as a fallback. Either service needs internet access.
+  const photon='https://photon.komoot.io/api/?limit=1&lang=en&q='+encodeURIComponent(query);
+  try {
+    const response=await fetch(photon,{headers:{'Accept':'application/json'}});
+    if(response.ok){const data=await response.json();const f=data.features&&data.features[0];if(f){const p=f.properties||{},c=f.geometry.coordinates;return {lat:Number(c[1]),lng:Number(c[0]),label:[p.name,p.street,p.city,p.state,p.country].filter(Boolean).join(', ')||query};}}
+  } catch(e) {}
+  const url='https://nominatim.openstreetmap.org/search?format=jsonv2&limit=1&countrycodes=in&q='+encodeURIComponent(query);
+  const response=await fetch(url,{headers:{'Accept':'application/json'}});
+  if(!response.ok) throw new Error('Location search unavailable');
+  const results=await response.json();
+  if(!results.length) return null;
+  return {lat:Number(results[0].lat),lng:Number(results[0].lon),label:results[0].display_name};
+}
+document.getElementById('reportForm').addEventListener('submit',async e=>{
+ e.preventDefault();
+ const name=document.getElementById('place').value.trim(); if(!name)return;
+ const submitBtn=document.querySelector('#reportForm button[type=submit]');
+ submitBtn.disabled=true; submitBtn.textContent='Saving report…';
+ let coords=null, approximate=false;
+ try{coords=await geocodeLocation(name+', Chennai, Tamil Nadu, India')}catch(err){}
+ if(!coords){try{coords=await geocodeLocation(name)}catch(err){}}
+ // A geocoder/network failure must not discard the user's report. Keep it at the current map centre and mark it approximate.
+ if(!coords){const c=map.getCenter();coords={lat:c.lat,lng:c.lng,label:'Approximate location — map centre'};approximate=true;}
+ const status=document.getElementById('status').value;
+ const beforePhoto=await readImage(document.getElementById('beforePhoto').files[0]);
+ const afterPhoto=await readImage(document.getElementById('afterPhoto').files[0]);
+ const report={id:nextId++,name,kind:document.getElementById('kind').value,risk:document.getElementById('risk').value,status,lat:coords.lat,lng:coords.lng,age:'Just now',beforePhoto,afterPhoto,fullAddress:coords.label,approximateLocation:approximate};
+ reports.push(report);
+ const stored=persist();
+ document.getElementById('reportForm').reset(); modal.style.display='none'; submitBtn.disabled=false; submitBtn.textContent='Add report';
+ render(); map.flyTo([report.lat,report.lng],17,{duration:1});
+ setTimeout(()=>{if(markers[report.id])markers[report.id].openPopup()},900);
+ if(!stored) toast('Report added for this session, but browser storage is blocked/full. Export CSV before closing.');
+ else if(approximate) toast('Report saved. Location lookup failed, so its map pin is approximate; edit the location by searching the map.');
+ else toast('Location found and report saved.');
+});
+// Press Enter in the map search to geocode a real place if it is not an existing report.
+document.getElementById('search').addEventListener('keydown',async e=>{if(e.key!=='Enter')return;const q=e.target.value.trim();if(!q)return;const match=reports.find(r=>r.name.toLowerCase().includes(q.toLowerCase()));if(match){zoomTo(match.id);return;}try{toast('Searching map location…');const found=await geocodeLocation(q);if(!found){toast('Location not found. Try adding city or area name.');return;}map.flyTo([found.lat,found.lng],16,{duration:1});L.marker([found.lat,found.lng]).addTo(map).bindPopup('<b>'+escapeHtml(q)+'</b><br>'+escapeHtml(found.label)).openPopup();}catch(err){toast('Location search needs internet access.');}});
+document.getElementById('exportBtn').onclick=()=>{const rows=[['ID','Location','Waste type','Priority','Priority score','Status','Repeat count','Before photo','After photo'],...reports.map(r=>[r.id,r.name,r.kind,r.risk,severityScore(r),r.status,recurrenceCount(r),r.beforePhoto?'Yes':'No',r.afterPhoto?'Yes':'No'])];const csv=rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\\n');const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download='cleanmap-reports.csv';a.click();URL.revokeObjectURL(url)};
+render();
+
+// Sidebar navigation: scroll to the matching working section and highlight it.
+function setWorkspaceView(view){document.body.dataset.view=view;document.querySelectorAll('.navitem').forEach(b=>b.classList.toggle('active',b.dataset.target===view||(view==='report'&&b.id==='sideReport')));if(view==='hotspots'){setTimeout(()=>map.invalidateSize(),150)}if(view==='report'){document.getElementById('newReport').click()}}
+document.querySelectorAll('.navitem[data-target]').forEach(btn=>btn.addEventListener('click',()=>setWorkspaceView(btn.dataset.target)));
+document.getElementById('sideReport').addEventListener('click',()=>setWorkspaceView('report'));
+
+
+</script>
+</body></html>
