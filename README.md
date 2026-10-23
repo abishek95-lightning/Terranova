@@ -1,4 +1,4 @@
-# CleanMap 2.0
+# CleanMap Campus
 
 A browser-based waste hotspot reporting and cleanup tracking demo.
 
